@@ -248,10 +248,10 @@ async def upload_file_page(stdscr, api):
     input_path = ""
     msg = "Enter file path to upload and press Enter: press ESC to go back"
     result = ""
-
+    uploadedIds = []
     while True:
         stdscr.clear()
-        stdscr.addstr(1, w // 2 - len("📤 File Upload") // 2, "📤 File Upload", curses.A_BOLD | curses.A_UNDERLINE)
+        stdscr.addstr(1, w // 2 - len("📤 File Upload") // 2, "📤 Filuploadedidse Upload", curses.A_BOLD | curses.A_UNDERLINE)
         stdscr.addstr(3, 2, msg)
         stdscr.addstr(5, 4, input_path)
         if result:
@@ -261,15 +261,17 @@ async def upload_file_page(stdscr, api):
         key = stdscr.getch()
 
         if key in (curses.KEY_ENTER, ord("\n")):
-            if os.path.isfile(str(input_path)):
-                try:
-                    uploaded_path = await api.upload_file(input_path)
-                    result = f"✅ Uploaded: {uploaded_path}"
-                    break
-                except Exception as e:
-                    result = f"❌ Upload failed: {str(e)}"
-            else:
-                result = "❌ Invalid file path."
+            input_pathList = input_path.split(',')
+            for path in input_pathList:
+                if os.path.isfile(str(path)):
+                    try:
+                        uploadedId = await api.upload_file(path)
+                        uploadedIds.append(uploadedId)
+                        result = f"✅ Uploaded: ".join(str(x) for x in uploadedIds)
+                    except Exception as e:
+                        result = f"❌ Upload failed: {str(e)}"
+                else:
+                    result = f"❌{path} is Invalid file path. press ESC to go back"
         elif key == 27:  # ESC to go back
             break
         elif key in (curses.KEY_BACKSPACE, 127):
