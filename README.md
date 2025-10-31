@@ -8,7 +8,7 @@
 
 ### Prerequisites
 
-- Python 3.10 or newer
+- Python 3.10 and before 3.13
 
 ### Environment variables set up
 
