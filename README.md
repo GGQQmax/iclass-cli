@@ -10,6 +10,12 @@
 
 - Python 3.10 and before 3.13
 
+## Auto download Script
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/GGQQmax/iclass-cli/main/IclassCLI_setup.sh)
+```
+## Manually install
+
 ### Environment variables set up
 
 add `.env` to the project folder
