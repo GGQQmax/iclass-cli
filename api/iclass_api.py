@@ -49,7 +49,8 @@ class TronClassAPI:
         filename = 'downloaded_file'  # fallback
 
         if cd and "filename*=" in cd:
-            encoded_filename = cd.split("filename*=UTF-8''")[-1]
+            encoded_filename = cd.split(";")[-1]
+            encoded_filename = encoded_filename.replace(" filename=UTF-8''","")
             filename = urllib.parse.unquote(encoded_filename)
 
         downloads_dir = Path.home() / 'Downloads'
