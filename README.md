@@ -8,7 +8,8 @@ View the to-do list, submit your homework, and achieve more in your terminal!
 
 ### Prerequisites
 
-- Python 3.10 and before 3.13
+- Python 3.10 and before 3.14*
+- Python venv virtual environments
 
 ## Auto download Script
 ```bash
