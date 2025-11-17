@@ -34,8 +34,8 @@ echo ""
 echo "🏁 Setup complete. To start using iClass CLI:"
 echo ""
 echo "    source venv/bin/activate"
-echo "    python mainUI.py"
+echo "    python main.py"
 echo ""
 echo "🎉 Done!"
 
-python mainUI.py
+python main.py
