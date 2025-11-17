@@ -17,6 +17,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/GGQQmax/iclass-cli/main/Icla
 ```
 ## Manually install
 
+Git clone the project
+
+```bash
+git clone https://github.com/GGQQmax/iclass-cli.git
+```
+
 ### Environment variables set up
 
 add `.env` to the project folder
@@ -25,21 +31,18 @@ add `.env` to the project folder
 USERNAMEID="YOURSTUDENTID"
 PASSWORD="YOURSSOPASSWORD"
 ```
-
-how to build to a exe
+Set up python virtual environments and install package
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-pip install pyinstaller
-pyinstaller main.py --onefile --name iclassCLI --add-data '.env:.'
 ```
 
----
-
-## UI version
+how to build to a exe
 ```bash
 pip install -r requirements.txt
 pip install windows-curses #Might need if you using windows
 pip install pyinstaller
-pyinstaller mainUI.py --onefile --name iclassCLIUI --add-data '.env:.'
+pyinstaller main.py --onefile --name iclassCLI --add-data '.env:.'
 ```
