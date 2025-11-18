@@ -26,10 +26,8 @@ class Authenticator:
         match = re.search(r"<title>(.*?)</title>", content, re.IGNORECASE)
 
         if match and match.group(1) == "淡江大學單一登入(SSO)":
-            print("login fail")
             return False
         else:
-            print("login pass")
             return True
 
     def perform_auth(self):
@@ -70,7 +68,7 @@ class Authenticator:
         response = self.session.post(login_url, data=payload)
         
         if self.check_login_success(response) != True:
-            return {"erorr":"user name or password maybe not currect on the os level"}
+            raise ValueError("Username or password may be incorrect at the OS level, go take a look at env")
         headers = {'Referer': login_url, 'Upgrade-Insecure-Requests': '1'}
         user_redirect_url = (
             f"https://sso.tku.edu.tw/NEAI/eaido.jsp?"
