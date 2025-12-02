@@ -18,10 +18,12 @@ def main():
     parser.add_argument("--todo", action="store_true", help="Print todo list")
     parser.add_argument("--courses", action="store_true", help="Print course list")
     parser.add_argument("-u","--upload", help="Upload a file")
-    parser.add_argument("--nofullui", action="store_true", help="Skip curses UI")
 
     # Global option
     parser.add_argument("--raw", action="store_true", help="Output raw file instead of formatted table")
+    parser.add_argument("-p","--page", action="store_true", help="Page of the data. defult is 1")
+    parser.add_argument("-z","--size", action="store_true", help="Amount of the data from the page. defult is 10")
+    parser.add_argument("-id","--byid", action="store_true", help="Get by id")
 
     args = parser.parse_args()
 
