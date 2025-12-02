@@ -20,13 +20,17 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching todos: {str(e)}"}
 
-    async def get_bulletins(self):
+    async def get_bulletins(self,start_date:date=None,end_date:date=None):
         base_url = 'https://iclass.tku.edu.tw/api/course-bulletins'
-        today = date.today()
-        one_month_ago = today - relativedelta(months=1)
+        if end_date == None:
+            end_date = date.today()
+        
+        if start_date == None:
+            start_date = end_date - relativedelta(months=1)#one_month_ago
+        
         conditions = {
-        "start_date": one_month_ago.isoformat(),
-        "end_date": today.isoformat(),
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
         "keyword": ""
         }
         query_string = urllib.parse.urlencode({
