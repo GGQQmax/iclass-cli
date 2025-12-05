@@ -127,7 +127,7 @@ class TronClassAPI:
 
         response = self.session.post(url, headers=headers, data=json.dumps(payload))
 
-        if response.ok:
+        if response.status_code == 201:
             return {"Submission successful":response.status_code}
         else:
             return {"Submission failed", response.status_code, response.text}
