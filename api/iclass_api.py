@@ -86,6 +86,15 @@ class TronClassAPI:
             return response.json()
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching courses: {str(e)}"}
+
+    async def get_enrollments(self,course_id):
+        url = f"https://iclass.tku.edu.tw/api/course/{course_id}/enrollments"
+        try:
+            response = self.session.get(url)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"error": f"Error fetching enrollments: {str(e)}"}
     
     async def get_activities(self,course_id):
         url = f'https://iclass.tku.edu.tw/api/courses/{course_id}/activities?sub_course_id=0'
