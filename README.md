@@ -46,3 +46,11 @@ pip install windows-curses #Might need if you using windows
 pip install pyinstaller
 pyinstaller main.py --onefile --name iclassCLI --add-data '.env:.'
 ```
+
+## Some pro tip
+quick upload file by using grep
+```bash
+ls | grep "grep fillter" | iclassCLI -u
+```
+
+
