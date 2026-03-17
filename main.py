@@ -16,8 +16,9 @@ def start_ui(stdscr, api):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--todo", action="store_true", help="Print todo list")
-    parser.add_argument("--courses", action="store_true", help="Print course list")
-    parser.add_argument("-u","--upload", help="Upload a file")
+    parser.add_argument("-c","--courses", action="store_true", help="Print course list")
+    parser.add_argument("-b","--bulletins", action="store_true", help="Print bulletins")
+    parser.add_argument("-u", "--upload",nargs="?",const="-",help="Upload a file (or read from stdin)")
 
     # Global option
     parser.add_argument("--raw", action="store_true", help="Output raw file instead of formatted table")

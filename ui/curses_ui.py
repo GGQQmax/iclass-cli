@@ -314,7 +314,7 @@ class IClassCursesUI:
             user_name = user.get("name","")
             user_no = user.get("user_no","")
             roles = enrollments.get("roles","")
-            preview_line = preview_line = f"📌 {user_id} | {user_name} | {user_no} | {roles[0]}"
+            preview_line = preview_line = f"👤 {user_id} | {user_name} | {user_no} | {roles[0]}"
             enrollments_meta.append((user_id, preview_line))
 
         enrollments_meta.append((None, "🔙 Back"))
