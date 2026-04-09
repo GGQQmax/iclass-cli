@@ -5,7 +5,7 @@ import asyncio
 import sys
 from api.auth_module import Authenticator
 from api.iclass_api import TronClassAPI
-from ui.curses_ui import IClassCursesUI
+from curses_ui import IClassCursesUI
 from cli import handle_cli
 
 

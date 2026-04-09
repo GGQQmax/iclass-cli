@@ -1,20 +1,32 @@
+import secrets
+import requests
 class TronClassRollCallAPI:
     def __init__(self, session):
         self.session = session
+        self.deviceId = self.generate_device_id()
 
-    def getRollCall(self):
+    def generate_device_id(self,length=16):
+        # Generates a secure random hex string
+        return secrets.token_hex(length // 2)
+
+    async def getRollCall(self):
         url = "https://iclass.tku.edu.tw/api/radar/rollcalls?api_version=1.1.0"
-        self.session.get(url)
-        response.raise_for_status()
-                data = response.json()
-                rollcall_id = ""
-                rollcalls = data.get('rollcalls', [])
-                for rollcall in rollcalls:
-                    if rollcall.get('rollcall_id'):
-                        print(f"Found rollcall: ID = {rollcall['rollcall_id']}, Source = {rollcall['source']}")
-                        return rollcall['rollcall_id'],rollcall['source']
 
-    def answer_rollcall_number(self,rollcall_id,number,deviceId):
+        response = self.session.get(url)
+        response.raise_for_status()
+
+        data = response.json()
+
+        rollcalls = data.get('rollcalls', [])
+
+        for rollcall in rollcalls:
+            if rollcall.get('rollcall_id'):
+                print(f"Found rollcall: ID = {rollcall['rollcall_id']}, Source = {rollcall['source']}")
+                return rollcall['rollcall_id'], rollcall['source']
+
+        return None, None
+
+    def answer_rollcall_number(self,rollcall_id,number):
         url = f"https://iclass.tku.edu.tw/api/rollcall/{rollcall_id}/answer_number_rollcall"
 
         headers = {
@@ -37,13 +49,13 @@ class TronClassRollCallAPI:
         }
         code = f"{number:04d}"
         data = {
-            "deviceId": deviceId,
+            "deviceId": self.deviceId,
             "numberCode": code,
         }
         response = self.session.put(url,headers,data=data)
         return response
 
-    def answer_rollcall_Radar(session, rollcall_id, deviceId):
+    def answer_rollcall_Radar(session, rollcall_id):
         url = f"https://iclass.tku.edu.tw/api/rollcall/{rollcall_id}/answer?api_version=1.1.2"
 
         headers = {
@@ -65,7 +77,7 @@ class TronClassRollCallAPI:
         }
 
         payload = {
-            "deviceId": deviceId, #7eba2081f77e5527
+            "deviceId": self.deviceId, #7eba2081f77e5527
             "latitude": 25.174269373936202,
             "longitude": 121.45422774303604,
             "speed": None,
