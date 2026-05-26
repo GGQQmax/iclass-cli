@@ -52,5 +52,8 @@ quick upload file by using grep
 ```bash
 ls | grep "grep fillter" | iclassCLI -u
 ```
-
-
+Or you are doing wth your are
+```bash
+ls | grep HWK10 | iclassCLI -u --raw | iclassCLI -s -i "$(iclassCLI --todo | awk '/HWK10/{print $NF}')" -ids -
+```
+I think you got the idea
