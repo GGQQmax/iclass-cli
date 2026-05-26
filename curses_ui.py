@@ -1,22 +1,16 @@
 import curses
 import asyncio
-import signal
 import os
 from datetime import datetime
 from bs4 import BeautifulSoup
-from ui.ui_base import UIBase
 
+from ui.ui_base import UIBase
+from ui.ui_bulletins import BulletinsUI
 from ui.ui_todo import todo
 from ui.ui_curses import CursesUI
 from ui.ui_getfile import GetFileUI
 from ui.ui_uploading_file import UploadFileUI
 from ui.ui_rollcall import RollCallUI
-
-def handle_exit(signum, frame):
-    raise KeyboardInterrupt
-
-signal.signal(signal.SIGINT, handle_exit)
-
 
 class IClassCursesUI(UIBase):
     def __init__(self, api):    
@@ -32,6 +26,7 @@ class IClassCursesUI(UIBase):
             "My Class",
             "My Files",
             "File Upload",
+            "Bulletins",
             "Rollcall"
         ]
         
@@ -63,6 +58,9 @@ class IClassCursesUI(UIBase):
                     await upload_ui.upload_file_page(stdscr)
                     pass
                 elif(selected_idx==4):
+                    bulletins_ui = BulletinsUI(self.api)
+                    await bulletins_ui.bulletins(stdscr)
+                elif(selected_idx==5):
                     rollcall_ui = RollCallUI(self.api)
                     await rollcall_ui.rollcall_menu(stdscr)
         pass

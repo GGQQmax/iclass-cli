@@ -105,7 +105,7 @@ class RollCallUI(BaseUI):
 
             if key in (curses.KEY_ENTER, ord("\n")):
                 try:
-                    res = await api.answer_rollcall_number(rollcall_id, number)
+                    res = await api.answer_rollcall_number(rollcall_id, int(number))
                     result = f"✅ Success: {res}"
                 except Exception as e:
                     result = f"❌ Failed: {str(e)}"

@@ -1,5 +1,6 @@
 import curses
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from ui.ui_base import UIBase as BaseUI
 from ui.ui_activityHandler import activityHandler
 class todo(BaseUI):
@@ -22,9 +23,17 @@ class todo(BaseUI):
         for t in todos:
             due = t.get("end_time", "")
             try:
-                # Format ISO 8601 to readable time
-                due_dt = datetime.fromisoformat(due.replace("Z", "+00:00"))
-                due_str = due_dt.strftime("%Y-%m-%d %H:%M")
+                # Handle Z suffix from API
+                utc_time = datetime.fromisoformat(
+                    due.replace("Z", "+00:00")
+                )
+
+                taiwan_time = utc_time.astimezone(
+                    ZoneInfo("Asia/Taipei")
+                )
+
+                due_str = taiwan_time.strftime("%Y-%m-%d %H:%M")
+
             except Exception:
                 due_str = due
 

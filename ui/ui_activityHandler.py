@@ -1,6 +1,7 @@
 import curses
 from bs4 import BeautifulSoup
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from ui.ui_base import UIBase as BaseUI
 
 class activityHandler(BaseUI):
@@ -14,8 +15,15 @@ class activityHandler(BaseUI):
         activity_type = response.get("type", "N/A")
         deadline = response.get("end_time", "N/A")
         try:
-            due_dt = datetime.fromisoformat(deadline.replace("Z", "+00:00"))
-            due_str = due_dt.strftime("%Y-%m-%d %H:%M")
+            utc_time = datetime.fromisoformat(
+            deadline.replace("Z", "+00:00")
+            )
+
+            taiwan_time = utc_time.astimezone(
+                ZoneInfo("Asia/Taipei")
+            )
+
+            due_str = taiwan_time.strftime("%Y-%m-%d %H:%M")
         except:
             due_str = deadline
 

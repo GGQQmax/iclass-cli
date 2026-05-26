@@ -19,12 +19,15 @@ def main():
     parser.add_argument("-c","--courses", action="store_true", help="Print course list")
     parser.add_argument("-b","--bulletins", action="store_true", help="Print bulletins")
     parser.add_argument("-u", "--upload",nargs="?",const="-",help="Upload a file (or read from stdin)")
+    parser.add_argument("-s","--submit", action="store_true", help="Summit HomeWork")
 
     # Global option
     parser.add_argument("--raw", action="store_true", help="Output raw file instead of formatted table")
     parser.add_argument("-p","--page", action="store_true", help="Page of the data. defult is 1")
     parser.add_argument("-z","--size", action="store_true", help="Amount of the data from the page. defult is 10")
     parser.add_argument("-id","--byid", action="store_true", help="Get by id")
+    parser.add_argument("-ids","--fileids", action="store_true", help="Send file id as list")
+
 
     args = parser.parse_args()
 

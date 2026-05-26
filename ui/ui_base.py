@@ -1,4 +1,6 @@
 import curses
+import signal
+
 class UIBase:
     def __init__(self, api):
         self.api = api
@@ -28,3 +30,8 @@ class UIBase:
         stdscr.addstr(h//2 + 2, w//2 - 10, "Press any key...")
         stdscr.refresh()
         stdscr.getch()
+
+    def handle_exit(signum, frame):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGINT, handle_exit)

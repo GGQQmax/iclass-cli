@@ -36,17 +36,18 @@ class CursesUI(UIBase):
         curses.curs_set(0)
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_CYAN)
 
-        response = await self.api.get_enrollments(course_id)
-
+        response = await self.api.get_enrollments(course_id,data={"fields":"id,user(id,name,user_no,department(id,name,code)),roles,seat_number"})
         enrollments_meta = []  # Store just ID and preview info
         print("enrollments")
         for enrollments in response["enrollments"]:
-            user_id = enrollments.get("user_id", "")
+            user_id = enrollments.get("seat_number", "")
             user = enrollments.get("user","")
             user_name = user.get("name","")
             user_no = user.get("user_no","")
             roles = enrollments.get("roles","")
-            preview_line = preview_line = f"👤 {user_id} | {user_name} | {user_no} | {roles[0]}"
+            department = user.get("department",{})
+            department_name = department.get("name","")
+            preview_line = preview_line = f"👤 {user_id} | {user_name} | {user_no} | {roles[0]} | {department_name}"
             enrollments_meta.append((user_id, preview_line))
 
         enrollments_meta.append((None, "🔙 Back"))

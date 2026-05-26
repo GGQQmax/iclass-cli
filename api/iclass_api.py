@@ -87,10 +87,21 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching courses: {str(e)}"}
 
-    async def get_enrollments(self,course_id):
+    async def get_enrollments(self,course_id,data:dict=None):
         url = f"https://iclass.tku.edu.tw/api/course/{course_id}/enrollments"
+        """
+        data example:
+        data = {"fields":"id,user(id,email,name,nickname,user_no,comment,grade(id,name),klass(id,name,code),department(id,name,code),org(id,name),program(id,name),user_attributes(tag)),roles,aliases,retake_status,seat_number,data,imported_from"}
+        """
         try:
-            response = self.session.get(url)
+            if data is not None:
+                response = self.session.post(
+                url,
+                json=data,
+                headers={"Content-Type": "application/json;charset=UTF-8"}
+                )
+            else:
+                response = self.session.get(url)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -150,7 +161,6 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching courses: {str(e)}"}
 
-
     async def upload_file(self,file_path:str):
         try:
             file_name = os.path.basename(file_path)
@@ -195,8 +205,6 @@ class TronClassAPI:
         upload_file_id = upload_info["id"]
         upload_file_type = upload_info["type"]
 
-        print(f"✅ Got upload URL:\n{upload_url}")
-
         with open(file_path, 'rb') as f:
             files = {
                 'file': (upload_file_name, f, upload_file_type)
@@ -209,9 +217,6 @@ class TronClassAPI:
 
             upload_response = self.session.put(upload_url, files=files, headers=headers_upload)
 
-            print(f"📤 Upload response: {upload_response.status_code}")
-            print(upload_response.text)
-            print(f"Upload file id {upload_file_id}")
         return upload_file_id
     
     async def deleteUpload(self, upload_ids: list):
@@ -235,3 +240,4 @@ class TronClassAPI:
                 return {"Deletion failed": response.status_code, "details": response.text}
         except requests.exceptions.RequestException as e:
             return {"error": f"Error deleting uploads: {str(e)}"}
+
