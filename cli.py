@@ -60,6 +60,45 @@ async def handle_cli(args, api):
         print(table.draw())
         return
     
+    if args.submit:
+        # Collect file ids to submit. Support stdin ("-") or comma-separated list.
+        fileids = []
+        if args.id:
+            id = args.id
+        else:
+            print("No activity id provided for submission")
+            return
+        
+        if getattr(args, 'fileids', None):
+            # Support: '-' to read file ids from stdin, a list from argparse,
+            # or a comma-separated string.
+            if isinstance(args.fileids, (list, tuple)):
+                # Single '-' in a list means read from stdin
+                if len(args.fileids) == 1 and args.fileids[0] == '-':
+                    fileids = [line.strip() for line in sys.stdin if line.strip()]
+                else:
+                    fileids = list(args.fileids)
+            else:
+                if args.fileids == "-":
+                    fileids = [line.strip() for line in sys.stdin if line.strip()]
+                else:
+                    fileids = [f.strip() for f in str(args.fileids).split(',') if f.strip()]
+
+        if not fileids:
+            print("No file ids provided for submission")
+            return
+        
+
+        try:
+            result = await api.submit_homework(id,fileids)
+            if args.raw:
+                print(result)
+            else:
+                print(f"Submitted {len(fileids)} file(s): {', '.join(fileids)}")
+        except Exception as e:
+            print(f"Submission failed: {e}")
+        return
+    
     if args.bulletins:
 
         result = await api.get_bulletins()
@@ -103,7 +142,10 @@ async def handle_cli(args, api):
         for f in files:
             try:
                 uploaded_id = await api.upload_file(f)
-                print(f"Uploaded: {f} -> {uploaded_id}")
+                if args.raw:
+                    print(uploaded_id)
+                else:
+                    print(f"Uploaded: {f} -> {uploaded_id}")
             except Exception as e:
                 print(f"Failed: {f} -> {e}")
 

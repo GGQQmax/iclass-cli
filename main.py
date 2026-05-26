@@ -23,10 +23,10 @@ def main():
 
     # Global option
     parser.add_argument("--raw", action="store_true", help="Output raw file instead of formatted table")
-    parser.add_argument("-p","--page", action="store_true", help="Page of the data. defult is 1")
-    parser.add_argument("-z","--size", action="store_true", help="Amount of the data from the page. defult is 10")
-    parser.add_argument("-id","--byid", action="store_true", help="Get by id")
-    parser.add_argument("-ids","--fileids", action="store_true", help="Send file id as list")
+    parser.add_argument("-p","--page", type=int, default=1, help="Page of the data. default is 1")
+    parser.add_argument("-z","--size", type=int, default=10, help="Amount of the data from the page. default is 10")
+    parser.add_argument("-i","--id", help="Get by id")
+    parser.add_argument("-ids","--fileids", nargs='*', help="Send file id as list")
 
 
     args = parser.parse_args()
