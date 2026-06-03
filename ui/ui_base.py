@@ -20,7 +20,18 @@ class UIBase:
                 stdscr.attroff(curses.color_pair(1))
             else:
                 stdscr.addstr(y, x, option)
-            stdscr.refresh()
+
+    def get_page_info(self, total_items, page_size, page):
+        total_pages = max(1, (total_items + page_size - 1) // page_size)
+        page = min(max(page, 1), total_pages)
+        return page, total_pages
+
+    def draw_paged_menu(self, stdscr, selected_idx, options, title, page, total_pages):
+        self.draw_menu(stdscr, selected_idx, options, title)
+        h, w = stdscr.getmaxyx()
+        footer = f"Page {page}/{total_pages} | ← Prev | → Next | q Back"
+        stdscr.addstr(h - 1, 2, footer[:w - 4], curses.A_BOLD)
+        stdscr.refresh()
 
     def show_message(self, stdscr, message):
         stdscr.clear()

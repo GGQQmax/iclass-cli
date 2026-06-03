@@ -31,13 +31,6 @@ class TronClassAPI:
         if start_date == None:
             start_date = end_date - relativedelta(months=1)#one_month_ago
         
-        if isinstance(start_date, str):
-            start_date = date.fromisoformat(start_date)
-
-        if isinstance(end_date, str):
-            end_date = date.fromisoformat(end_date)
-        
-
         conditions = {}
         if start_date == "" or end_date == "":
             # keep it empty string if user want to use default value

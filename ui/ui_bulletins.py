@@ -6,44 +6,59 @@ class BulletinsUI(UIBase):
         self.api = api
 
     async def bulletins(self,stdscr, org_mode=False):
-        if  org_mode == True:
-            result = await self.api.get_bulletins(org_mode=True)
-        else:
-            result = await self.api.get_bulletins()
-        
-        if result.get("error"):
-            self.show_message(stdscr, f"❌ {result['error']}")
-            return
-        
-        bulletins = result.get("bulletins", [])
+        page = 1
+        page_size = 10
+        selected_idx = 0
+        cached_pages = {}
 
         result = await self.api.get_courses()
         courses = result.get("courses", [])
         course_map = {c['id']: c['name'] for c in courses}
-        if org_mode:# there is no course name in org mode, so just show the title with (Org Mode) tag
-            bulletin_options = [f"{b['title']} (Org Mode)" for b in bulletins]
-            pass
-        else:
-            bulletin_options = [f"{course_map.get(b['course_id'], b['course_id'])} - {b['title']}" for b in bulletins]
 
-        selected_idx = 0
         while True:
-            self.draw_menu(stdscr, selected_idx, bulletin_options + ["Exit"], "📢 Bulletins")
+            if page not in cached_pages:
+                result = await self.api.get_bulletins(org_mode=org_mode, page=page, size=page_size)
+                if result.get("error"):
+                    self.show_message(stdscr, f"❌ {result['error']}")
+                    return
+                cached_pages[page] = result
+
+            page_result = cached_pages[page]
+            bulletins = page_result.get("bulletins", [])
+            total_pages = page_result.get("pages") or page_result.get("total_pages") or 1
+            if total_pages == 1 and len(bulletins) == page_size:
+                total_pages = page + 1
+
+            if org_mode:  # there is no course name in org mode, so just show the title with (Org Mode) tag
+                bulletin_options = [f"{b['title']} (Org Mode)" for b in bulletins]
+            else:
+                bulletin_options = [f"{course_map.get(b['course_id'], b['course_id'])} - {b['title']}" for b in bulletins]
+
+            selected_idx = min(selected_idx, len(bulletin_options))
+            title = f"📢 Bulletins (Page {page}/{total_pages})"
+            self.draw_paged_menu(stdscr, selected_idx, bulletin_options + ["Exit"], title, page, total_pages)
             key = stdscr.getch()
+
             if key == curses.KEY_UP and selected_idx > 0:
                 selected_idx -= 1
             elif key == curses.KEY_DOWN and selected_idx < len(bulletin_options):
                 selected_idx += 1
+            elif key == curses.KEY_RIGHT and page < total_pages:
+                page += 1
+                selected_idx = 0
+            elif key == curses.KEY_LEFT and page > 1:
+                page -= 1
+                selected_idx = 0
             elif key == ord('o'):
-                # Switch to org mode
-                await self.bulletins(stdscr, org_mode=True)
-                pass
+                org_mode = not org_mode
+                page = 1
+                selected_idx = 0
+                cached_pages.clear()
             elif key in [curses.KEY_ENTER, ord('\n')]:
                 if selected_idx == len(bulletin_options):
                     break
                 selected_bulletin = bulletins[selected_idx]
                 await self.bulletins_detail(stdscr, selected_bulletin)
-                
 
         pass
 
@@ -80,23 +95,41 @@ class BulletinsUI(UIBase):
         lines = wrapped_desc + [""] + [f"📎 {u['name']} (Size: {u['size']} bytes)" for u in uploads] + ["", "🔙 Press 'q' to go back"]
         
         offset = 0
+        page_size = max(1, h - 3)
+        total_pages = max(1, (len(lines) + page_size - 1) // page_size)
 
-        stdscr.clear()
-        for i, line in enumerate(lines[offset:offset + h - 2]):
-            stdscr.addstr(i + 1, 2, line[:w - 4])
-        stdscr.refresh()
+        while True:
+            stdscr.clear()
+            visible = lines[offset:offset + page_size]
+            for i, line in enumerate(visible):
+                stdscr.addstr(i + 1, 2, line[:w - 4])
 
-        key = stdscr.getch()
-        if key == ord('q'):
-            return
-        if key == ord('d') and uploads:
-            # Download all files
-            for upload in uploads:
-                file_id = upload["reference_id"]
-                res = await self.api.download_file(file_id)
-                if res:
-                    self.show_message(stdscr, f"✅ Downloaded: {upload['name']}")
-                else:
-                    self.show_message(stdscr, f"❌ Failed to download: {upload['name']}")
-            pass
+            footer = f"Page {offset // page_size + 1}/{total_pages} | ← Previous page | → Next page | q Back"
+            if uploads:
+                footer += " | d Download all"
+            stdscr.addstr(h - 1, 2, footer[:w - 4], curses.A_BOLD)
+            stdscr.refresh()
+
+            key = stdscr.getch()
+            if key == ord('q'):
+                return
+            elif key == curses.KEY_RIGHT and offset + page_size < len(lines):
+                offset = min(offset + page_size, len(lines) - page_size)
+            elif key == curses.KEY_LEFT and offset > 0:
+                offset = max(0, offset - page_size)
+            elif key == curses.KEY_DOWN and offset + page_size < len(lines):
+                offset += 1
+            elif key == curses.KEY_UP and offset > 0:
+                offset -= 1
+            elif key == ord('d') and uploads:
+                for upload in uploads:
+                    file_id = upload["reference_id"]
+                    res = await self.api.download_file(file_id)
+                    if res:
+                        self.show_message(stdscr, f"✅ Downloaded: {upload['name']}")
+                    else:
+                        self.show_message(stdscr, f"❌ Failed to download: {upload['name']}")
+            # Keep offset aligned to page boundaries when page size changes
+            total_pages = max(1, (len(lines) + page_size - 1) // page_size)
+            offset = min(offset, max(0, len(lines) - page_size))
     
