@@ -20,21 +20,46 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching todos: {str(e)}"}
 
-    async def get_bulletins(self,start_date:date=None,end_date:date=None):
+    async def get_bulletins(self,org_mode:bool=False,start_date=None,end_date=None,page:int=1,size:int=10,course_ids:list=[]):
         base_url = 'https://iclass.tku.edu.tw/api/course-bulletins'
+        if org_mode:
+            base_url = 'https://iclass.tku.edu.tw/api/org-bulletin/bulletins'
+
         if end_date == None:
             end_date = date.today()
         
         if start_date == None:
             start_date = end_date - relativedelta(months=1)#one_month_ago
         
-        conditions = {
-        "start_date": start_date.isoformat(),
-        "end_date": end_date.isoformat(),
-        "keyword": ""
-        }
+        if isinstance(start_date, str):
+            start_date = date.fromisoformat(start_date)
+
+        if isinstance(end_date, str):
+            end_date = date.fromisoformat(end_date)
+        
+
+        conditions = {}
+        if start_date == "" or end_date == "":
+            # keep it empty string if user want to use default value
+            conditions = {
+            "start_date":"",
+            "end_date": "",
+            "keyword": "",
+            "course_ids": course_ids
+            }
+
+        else:
+            conditions = {
+            "start_date": start_date.isoformat(),
+            "end_date": end_date.isoformat(),
+            "keyword": "",
+            "course_ids": course_ids
+            }
+
         query_string = urllib.parse.urlencode({
-            "conditions": json.dumps(conditions)
+            "conditions": json.dumps(conditions),
+            "page": page,
+            "page_size": size
         })
 
         url = f"{base_url}?{query_string}"
