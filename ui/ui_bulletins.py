@@ -50,10 +50,13 @@ class BulletinsUI(UIBase):
                 page -= 1
                 selected_idx = 0
             elif key == ord('o'):
+                return
+            elif key == ord('q'):
                 org_mode = not org_mode
                 page = 1
                 selected_idx = 0
                 cached_pages.clear()
+
             elif key in [curses.KEY_ENTER, ord('\n')]:
                 if selected_idx == len(bulletin_options):
                     break
