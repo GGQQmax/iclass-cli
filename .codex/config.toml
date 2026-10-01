@@ -1,0 +1,5 @@
+[mcp_servers.iclass]
+command = "/home/ggqqmax/git/iclass-cli/.venv/bin/python"
+args = ["iclass_mcp_server.py"]
+cwd = "/home/ggqqmax/git/iclass-cli"
+default_tools_approval_mode = "prompt"

@@ -3,3 +3,4 @@ dotenv
 texttable
 python-dateutil
 beautifulsoup4
+mcp>=2.2,<3
