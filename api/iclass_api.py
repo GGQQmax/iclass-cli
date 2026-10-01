@@ -63,7 +63,7 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error fetching bulletins: {str(e)}"}
 
-    async def fileDownloader(self,url):
+    async def fileDownloader(self,url,downloads_dir=None):
         response = self.session.get(url, stream=True)
 
         # Get filename from Content-Disposition (RFC 5987 format)
@@ -75,7 +75,9 @@ class TronClassAPI:
             encoded_filename = encoded_filename.replace(" filename=UTF-8''","")
             filename = urllib.parse.unquote(encoded_filename)
 
-        downloads_dir = Path.home() / 'Downloads'
+        if downloads_dir is None:
+            downloads_dir = Path.home() / 'Downloads'
+
         os.makedirs(downloads_dir, exist_ok=True)  # Create if it doesn't exist
 
         file_path = downloads_dir / filename
@@ -266,7 +268,6 @@ class TronClassAPI:
         """
         url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
         activity_details = await self.get_activitie(activity_id)  # Get activity details to determine if it's an upload or has a duration
-        print(f"Activity details for {activity_id}: {activity_details}")  # Debugging line
         headers = {
             "Accept": "*/*",
             "Content-Type": "application/json",
@@ -293,7 +294,7 @@ class TronClassAPI:
             results = []
             for payload in payloads:
                 response = self.session.post(url, headers=headers, json=payload)
-                print(f"Response for marking activity {activity_id} as read: {response.status_code}, {response.text}")  # Debugging line
+                # print(f"Response for marking activity {activity_id} as read: {response.status_code}, {response.text}")  # Debugging line
                 if response.ok:
                     try:
                         result = response.json()
@@ -316,24 +317,6 @@ class TronClassAPI:
             return {"success": True, "segments": results}
         except requests.exceptions.RequestException as e:
             return {"error": f"Error marking activity as read: {str(e)}"}
-    """
-    fetch("https://iclass.tku.edu.tw/api/course/activities-read/2042511", {
-    "headers": {
-        "accept": "*/*",
-        "accept-language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7,de;q=0.6",
-        "content-type": "application/json",
-        "priority": "u=1, i",
-        "x-requested-with": "XMLHttpRequest"
-    },
-    "referrer": "https://iclass.tku.edu.tw/course/265093/learning-activity/full-screen",
-    "body": "{\"start\":377,\"end\":431,\"duration\":431.16406666666666}",
-    "method": "POST",
-    "mode": "cors",
-    "credentials": "include"
-    });
-
-    
-    """
     
     async def get_topic_categories(self, course_id: int):
         """
