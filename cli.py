@@ -125,6 +125,30 @@ async def handle_cli(args, api):
             table.add_row([course_name, title, date])
         print(table.draw())
         return
+
+    if args.read_all_activities:
+        if args.course_id is None:
+            print("A course ID is required for --read-all-activities")
+            return
+
+        result = await api.read_all_activities(args.course_id)
+        if args.raw:
+            print(result)
+            return
+        if "error" in result:
+            print(result["error"])
+            return
+
+        table = Texttable()
+        table.set_deco(Texttable.HEADER)
+        table.set_cols_align(["l", "l"])
+        table.set_cols_valign(["m", "m"])
+        table.add_rows([["Activity ID", "Result"]])
+        for activity in result.get("read_results", []):
+            activity_result = activity.get("result", activity.get("error", ""))
+            table.add_row([activity.get("activity_id", ""), str(activity_result)])
+        print(table.draw())
+        return
     
     if args.upload:
         # Determine input source
