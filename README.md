@@ -39,6 +39,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Use with Codex
+
+Create the `.env` file described above and install the requirements. From the repository root, register the server with Codex:
+
+```bash
+codex mcp add iclass -- "$PWD/.venv/bin/python" "$PWD/iclass_mcp_server.py"
+codex mcp list
+```
+
+The repository also includes a project-scoped configuration at `.codex/config.toml`. To use it instead, update its `command` and `cwd` values to the paths for your checkout and virtual environment, then trust the project in Codex. Project-scoped configuration is loaded only for trusted projects. Tool calls prompt for approval by default.
+
 how to build to a exe
 ```bash
 pip install -r requirements.txt
