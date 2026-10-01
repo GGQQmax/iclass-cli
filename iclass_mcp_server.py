@@ -316,18 +316,6 @@ async def download_file_by_reference(reference_id: int) -> Any:
         return {"error": f"Failed to download file: {str(e)}"}
 
 
-@mcp.tool(description="Delete uploaded files by their upload IDs.")
-async def delete_uploads(upload_ids: List[int]) -> Any:
-    """
-    Delete uploads.
-
-    :param upload_ids: List of upload IDs to delete.
-    """
-    try:
-        api = get_api()
-        return await api.deleteUpload(upload_ids)
-    except Exception as e:
-        return {"error": f"Failed to delete uploads: {str(e)}"}
 
 
 def main():
