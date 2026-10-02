@@ -149,6 +149,30 @@ async def handle_cli(args, api):
             table.add_row([activity.get("activity_id", ""), str(activity_result)])
         print(table.draw())
         return
+
+    if args.like:
+        if args.course_id is None:
+            print("A course ID is required for --like")
+            return
+        if args.id is None:
+            print("A topic category ID (-i / --id) is required for --like")
+            return
+        
+        try:
+            category_id = int(args.id)
+        except ValueError:
+            print("Topic category ID must be an integer")
+            return
+
+        result = await api.send_likes_all_topics(args.course_id, category_id)
+        if args.raw:
+            print(result)
+        else:
+            if "error" in result:
+                print(result["error"])
+            else:
+                print(result.get("success", "Likes sent successfully."))
+        return
     
     if args.upload:
         # Determine input source

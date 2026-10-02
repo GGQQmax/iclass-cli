@@ -22,6 +22,7 @@ def main():
     parser.add_argument("-s","--submit", action="store_true", help="Summit HomeWork")
     parser.add_argument("--read-all-activities", action="store_true", help="Mark all activities in a course as read")
     parser.add_argument("--course-id", type=int, help="Course ID for --read-all-activities")
+    parser.add_argument("--like", action="store_true", help="Sending like")
 
     # Global option
     parser.add_argument("--raw", action="store_true", help="Output raw file instead of formatted table")

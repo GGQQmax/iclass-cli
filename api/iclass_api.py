@@ -448,7 +448,7 @@ class TronClassAPI:
         except requests.exceptions.RequestException as e:
             return {"error": f"Error liking topic: {str(e)}"}
 
-    async def send_likes(self, course_id: int, topic_categories_id: int):
+    async def send_likes_all_topics(self, course_id: int, topic_categories_id: int):
         try:
             topic_categories = await self.get_topic_categories(course_id)
         except Exception as e:
