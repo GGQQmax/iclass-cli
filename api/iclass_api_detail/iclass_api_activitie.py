@@ -104,8 +104,11 @@ class TronClassActivityAPI:
                 return results[0]
             return {"success": True, "results": results}
 
-        # Fallback for plain activity types
-        url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
+        # Fallback for plain activity types (or exam)
+        if activity_details.get("type") == "exam":
+            url = f"https://iclass.tku.edu.tw/api/course/activities-read/exam/{activity_id}"
+        else:
+            url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
         try:
             response = self.session.post(url, headers=headers, json={})
             print(f"Response for marking activity {activity_id} as read: {response.status_code}, {response.text}")

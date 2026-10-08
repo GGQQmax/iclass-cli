@@ -316,6 +316,84 @@ async def download_file_by_reference(reference_id: int) -> Any:
         return {"error": f"Failed to download file: {str(e)}"}
 
 
+@mcp.tool(description="Get exams list for a course.")
+async def get_course_exams(course_id: int) -> Any:
+    """Fetch exams for a course."""
+    try:
+        api = get_api()
+        return await api.get_course_exams(course_id)
+    except Exception as e:
+        return {"error": f"Failed to get course exams: {str(e)}"}
+
+
+@mcp.tool(description="Get metadata and details of an exam by exam ID.")
+async def get_exam_detail(exam_id: int) -> Any:
+    """Fetch exam details."""
+    try:
+        api = get_api()
+        return await api.get_exam(exam_id)
+    except Exception as e:
+        return {"error": f"Failed to get exam detail: {str(e)}"}
+
+
+@mcp.tool(description="Get questions and paper instance for an exam.")
+async def get_exam_questions(exam_id: int) -> Any:
+    """Fetch exam paper questions."""
+    try:
+        api = get_api()
+        return await api.get_exam_questions(exam_id)
+    except Exception as e:
+        return {"error": f"Failed to get exam questions: {str(e)}"}
+
+
+@mcp.tool(description="Get submissions and scores for an exam.")
+async def get_exam_submissions(exam_id: int) -> Any:
+    """Fetch submissions for an exam."""
+    try:
+        api = get_api()
+        return await api.get_exam_submissions(exam_id)
+    except Exception as e:
+        return {"error": f"Failed to get exam submissions: {str(e)}"}
+
+
+@mcp.tool(description="Get submission detail and correct answers review.")
+async def get_exam_submission_detail(exam_id: int, submission_id: int) -> Any:
+    """Fetch submission review."""
+    try:
+        api = get_api()
+        return await api.get_submission_detail(exam_id, submission_id)
+    except Exception as e:
+        return {"error": f"Failed to get submission detail: {str(e)}"}
+
+
+@mcp.tool(description="Save draft exam storage progress.")
+async def save_exam_storage(
+    exam_id: int,
+    exam_paper_instance_id: int,
+    subjects: List[Dict[str, Any]],
+    exam_submission_id: Optional[int] = None,
+) -> Any:
+    """Save in-progress exam answers to storage."""
+    try:
+        api = get_api()
+        return await api.save_exam_storage(exam_id, exam_paper_instance_id, subjects, exam_submission_id)
+    except Exception as e:
+        return {"error": f"Failed to save exam storage: {str(e)}"}
+
+
+@mcp.tool(description="Submit final exam answers.")
+async def submit_exam(
+    exam_id: int,
+    exam_paper_instance_id: int,
+    exam_submission_id: int,
+    subjects: List[Dict[str, Any]],
+) -> Any:
+    """Submit final exam paper."""
+    try:
+        api = get_api()
+        return await api.submit_exam(exam_id, exam_paper_instance_id, exam_submission_id, subjects)
+    except Exception as e:
+        return {"error": f"Failed to submit exam: {str(e)}"}
 
 
 def main():

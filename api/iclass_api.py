@@ -1,7 +1,15 @@
-from iclass_api_detail.iclass_api_topic import TronClassTopicAPI
-from iclass_api_detail.iclass_api_activitie import TronClassActivityAPI
-from iclass_api_detail.iclass_api_files import TronClassFilesAPI
-from iclass_api_detail.iclass_api_course import TronClassCourseAPI
+try:
+    from iclass_api_detail.iclass_api_topic import TronClassTopicAPI
+    from iclass_api_detail.iclass_api_activitie import TronClassActivityAPI
+    from iclass_api_detail.iclass_api_files import TronClassFilesAPI
+    from iclass_api_detail.iclass_api_course import TronClassCourseAPI
+    from iclass_api_detail.iclass_api_exam import TronClassExamAPI
+except ImportError:
+    from api.iclass_api_detail.iclass_api_topic import TronClassTopicAPI
+    from api.iclass_api_detail.iclass_api_activitie import TronClassActivityAPI
+    from api.iclass_api_detail.iclass_api_files import TronClassFilesAPI
+    from api.iclass_api_detail.iclass_api_course import TronClassCourseAPI
+    from api.iclass_api_detail.iclass_api_exam import TronClassExamAPI
 
 
 class TronClassAPI:
@@ -11,6 +19,7 @@ class TronClassAPI:
         self.files_api = TronClassFilesAPI(session)
         self.topic_api = TronClassTopicAPI(session)
         self.course_api = TronClassCourseAPI(session)
+        self.exam_api = TronClassExamAPI(session)
 
     async def get_todos(self):
         self.course_api = TronClassCourseAPI(self.session)
@@ -89,3 +98,63 @@ class TronClassAPI:
     async def read_all_activities(self, course_id: int):
         self.activity_api = TronClassActivityAPI(self.session)
         return await self.activity_api.read_all_activities(course_id)
+
+    # ==========================================
+    # Exam API interface methods
+    # ==========================================
+
+    async def get_course_exams(self, course_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_course_exams(course_id)
+
+    async def get_exam(self, exam_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_exam(exam_id)
+
+    async def get_exam_questions(self, exam_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_exam_questions(exam_id)
+
+    async def get_exam_distribute(self, exam_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_exam_distribute(exam_id)
+
+    async def get_exam_subjects_summary(self, exam_id: int, for_all_subjects: bool = False):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_exam_subjects_summary(exam_id, for_all_subjects)
+
+    async def check_exam_qualification(self, exam_id: int, check_status: str = "start"):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.check_exam_qualification(exam_id, check_status)
+
+    async def get_submission_storage(self, exam_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_submission_storage(exam_id)
+
+    async def get_exam_submissions(self, exam_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_exam_submissions(exam_id)
+
+    async def get_submission_detail(self, exam_id: int, submission_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_submission_detail(exam_id, submission_id)
+
+    async def get_exam_left_time(self, submission_id: int):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.get_left_time(submission_id)
+
+    async def read_exam_activity(self, exam_id: int, course_id: int = None):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.read_exam_activity(exam_id, course_id)
+
+    async def save_exam_storage(self, exam_id: int, exam_paper_instance_id: int, subjects: list, exam_submission_id: int = None, progress: dict = None):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.save_exam_storage(exam_id, exam_paper_instance_id, subjects, exam_submission_id, progress)
+
+    async def update_exam_answers(self, submission_id: int, exam_paper_instance_id: int, subjects_answers: list, progress: dict = None, play_record: dict = None):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.update_exam_answers(submission_id, exam_paper_instance_id, subjects_answers, progress, play_record)
+
+    async def submit_exam(self, exam_id: int, exam_paper_instance_id: int, exam_submission_id: int, subjects: list, progress: dict = None, reason: str = "user"):
+        self.exam_api = TronClassExamAPI(self.session)
+        return await self.exam_api.submit_exam(exam_id, exam_paper_instance_id, exam_submission_id, subjects, progress, reason)
