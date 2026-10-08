@@ -266,8 +266,15 @@ class TronClassAPI:
         Mark a course activity / upload as read.
         POST https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}
         """
-        url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
         activity_details = await self.get_activitie(activity_id)  # Get activity details to determine if it's an upload or has a duration
+        if not isinstance(activity_details, dict):
+            return {"error": "Invalid activity details received"}
+        if "error" in activity_details:
+            return activity_details
+
+        if not course_id and activity_details.get("course_id"):
+            course_id = activity_details.get("course_id")
+
         headers = {
             "Accept": "*/*",
             "Content-Type": "application/json",
@@ -276,25 +283,175 @@ class TronClassAPI:
         if course_id:
             headers["Referer"] = f"https://iclass.tku.edu.tw/course/{course_id}/learning-activity/full-screen"
 
+        # Check if activity is a video (either online_video type, duration in data, or upload containing video)
+        is_video = False
+        if activity_details.get("type") in ("online_video", "video"):
+            is_video = True
+        elif isinstance(activity_details.get("data"), dict) and activity_details["data"].get("duration") is not None:
+            is_video = True
+        elif isinstance(activity_details.get("uploads"), list):
+            for upload in activity_details["uploads"]:
+                if isinstance(upload, dict) and (upload.get("videos") or upload.get("type") == "video"):
+                    is_video = True
+                    break
+
+        if is_video:
+            return await self.read_video_activity(activity_id, course_id=course_id, activity_details=activity_details)
+
+        uploads = activity_details.get("uploads")
+        if uploads and isinstance(uploads, list) and len(uploads) > 0:
+            results = []
+            for upload in uploads:
+                if isinstance(upload, dict):
+                    res = await self.read_file_activity(
+                        activity_id,
+                        course_id=course_id,
+                        upload_id=upload.get("id"),
+                        activity_details=activity_details,
+                    )
+                    print(f"Marked upload {upload.get('id')} of activity {activity_id} as read: {res}")
+                    results.append(res)
+            if len(results) == 1:
+                return results[0]
+            return {"success": True, "results": results}
+
+        # Fallback for plain activity types
+        url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
+        try:
+            response = self.session.post(url, headers=headers, json={})
+            print(f"Response for marking activity {activity_id} as read: {response.status_code}, {response.text}")
+
+            if response.ok:
+                try:
+                    return response.json()
+                except ValueError:
+                    return {"success": True, "status_code": response.status_code}
+            else:
+                try:
+                    return {"error": f"Failed with status {response.status_code}", "details": response.json()}
+                except ValueError:
+                    return {"error": f"Failed with status {response.status_code}", "details": response.text}
+        except requests.exceptions.RequestException as e:
+            return {"error": f"Error marking activity as read: {str(e)}"}
+
+    async def read_file_activity(self, activity_id: int, course_id: int = None, upload_id: int = None, activity_details: dict = None):
+        """
+        Mark a file activity as read.
+        POST https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}
+        """
+        url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
+        if activity_details is None:
+            activity_details = await self.get_activitie(activity_id)
+
+        if not isinstance(activity_details, dict):
+            return {"error": "Invalid activity details received"}
+        if "error" in activity_details:
+            return activity_details
+
+        if not course_id and activity_details.get("course_id"):
+            course_id = activity_details.get("course_id")
+
+        headers = {
+            "Accept": "*/*",
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        if course_id:
+            headers["Referer"] = f"https://iclass.tku.edu.tw/course/{course_id}/learning-activity/full-screen"
+
+        if upload_id is None and isinstance(activity_details.get("uploads"), list) and len(activity_details["uploads"]) > 0:
+            first_upload = activity_details["uploads"][0]
+            if isinstance(first_upload, dict):
+                upload_id = first_upload.get("id")
+
+        payload = {"upload_id": upload_id} if upload_id is not None else {}
+
+        try:
+            response = self.session.post(url, headers=headers, json=payload)
+            if response.ok:
+                try:
+                    return response.json()
+                except ValueError:
+                    return {"success": True, "status_code": response.status_code}
+            else:
+                try:
+                    return {"error": f"Failed with status {response.status_code}", "details": response.json()}
+                except ValueError:
+                    return {"error": f"Failed with status {response.status_code}", "details": response.text}
+        except requests.exceptions.RequestException as e:
+            return {"error": f"Error marking file activity as read: {str(e)}"}
+
+    async def read_video_activity(self, activity_id: int, course_id: int = None, activity_details: dict = None):
+        """
+        Mark a video activity as read.
+        POST https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}
+        """
+        url = f"https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}"
+        if activity_details is None:
+            activity_details = await self.get_activitie(activity_id)
+
+        if not isinstance(activity_details, dict):
+            return {"error": "Invalid activity details received"}
+        if "error" in activity_details:
+            return activity_details
+
+        if not course_id and activity_details.get("course_id"):
+            course_id = activity_details.get("course_id")
+
+        headers = {
+            "Accept": "*/*",
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        if course_id:
+            headers["Referer"] = f"https://iclass.tku.edu.tw/course/{course_id}/learning-activity/full-screen"
+
+        # 1. URL video: duration is saved in activity_details["data"]["duration"]
+        duration = None
+        data = activity_details.get("data")
+        if isinstance(data, dict) and data.get("duration") is not None:
+            duration = data["duration"]
+
+        # 2. File video: duration is saved in upload["videos"][...]["duration"]
+        if not duration:
+            uploads = activity_details.get("uploads")
+            if isinstance(uploads, list):
+                for upload in uploads:
+                    if not isinstance(upload, dict):
+                        continue
+                    videos = upload.get("videos")
+                    if isinstance(videos, list) and len(videos) > 0:
+                        for v in videos:
+                            if isinstance(v, dict) and v.get("duration") is not None:
+                                duration = v["duration"]
+                                break
+                    if duration is not None:
+                        break
+                    if upload.get("duration") is not None:
+                        duration = upload["duration"]
+                        break
+
         payloads = [{}]
-
-        upload_id = activity_details.get("upload_id")
-        if upload_id is not None:
-            payloads[0]["upload_id"] = upload_id
-
-        elif "data" in activity_details and "duration" in activity_details["data"]:
-            duration = activity_details["data"]["duration"]
-            duration_seconds = int(duration)
-            payloads = [
-                {"start": start, "end": min(start + 100, duration_seconds), "duration": duration}
-                for start in range(0, duration_seconds, 100)
-            ] or [{"start": 0, "end": duration_seconds, "duration": duration}]
+        if duration is not None:
+            try:
+                duration_float = float(duration)
+                duration_seconds = int(duration_float)
+                if duration_seconds > 0:
+                    payloads = [
+                        {"start": start, "end": min(start + 100, duration_seconds), "duration": duration}
+                        for start in range(0, duration_seconds, 100)
+                    ] or [{"start": 0, "end": duration_seconds, "duration": duration}]
+                elif duration_float > 0:
+                    payloads = [{"start": 0, "end": 1, "duration": duration}]
+            except (ValueError, TypeError):
+                pass
 
         try:
             results = []
             for payload in payloads:
                 response = self.session.post(url, headers=headers, json=payload)
-                # print(f"Response for marking activity {activity_id} as read: {response.status_code}, {response.text}")  # Debugging line
+                print(f"Response for marking video activity {activity_id} as read: {response.status_code}, {response.text}")
+
                 if response.ok:
                     try:
                         result = response.json()
@@ -309,14 +466,14 @@ class TronClassAPI:
                     error = {"error": f"Failed with status {response.status_code}", "details": details}
                     if len(payloads) > 1:
                         error["completed_segments"] = len(results)
-                        error["failed_segment"] = {"start": payload["start"], "end": payload["end"]}
+                        error["failed_segment"] = {"start": payload.get("start"), "end": payload.get("end")}
                     return error
 
             if len(results) == 1:
                 return results[0]
             return {"success": True, "segments": results}
         except requests.exceptions.RequestException as e:
-            return {"error": f"Error marking activity as read: {str(e)}"}
+            return {"error": f"Error marking video activity as read: {str(e)}"}
     
     async def get_topic_categories(self, course_id: int):
         """
