@@ -7,3 +7,4 @@ test*
 *.pyc
 *.spec
 *.ttf
+log/
