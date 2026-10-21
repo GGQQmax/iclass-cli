@@ -50,7 +50,7 @@ class TronClassActivityAPI:
         else:
             return {"Submission failed": response.status_code, "details": response.text}
     
-    async def read_activity(self, activity_id: int, course_id: int = None):
+    async def read_activity(self, activity_id: int, course_id: int = None, upload_id: int = None):
         """
         Mark a course activity / upload as read.
         POST https://iclass.tku.edu.tw/api/course/activities-read/{activity_id}
@@ -60,6 +60,14 @@ class TronClassActivityAPI:
             return {"error": "Invalid activity details received"}
         if "error" in activity_details:
             return activity_details
+
+        if upload_id is not None:
+            return await self.read_file_activity(
+                activity_id,
+                course_id=course_id,
+                upload_id=upload_id,
+                activity_details=activity_details,
+            )
 
         if not course_id and activity_details.get("course_id"):
             course_id = activity_details.get("course_id")
@@ -100,6 +108,12 @@ class TronClassActivityAPI:
                     )
                     print(f"Marked upload {upload.get('id')} of activity {activity_id} as read: {res}")
                     results.append(res)
+                    if isinstance(res, dict) and (
+                        res.get("completeness") == "full"
+                        or (isinstance(res.get("data"), dict) and res["data"].get("completeness") in (100, "100", "full"))
+                    ):
+                        print(f"Activity {activity_id} reached completeness 'full', skipping remaining uploads.")
+                        break
             if len(results) == 1:
                 return results[0]
             return {"success": True, "results": results}
@@ -250,6 +264,13 @@ class TronClassActivityAPI:
                     except ValueError:
                         result = {"success": True, "status_code": response.status_code}
                     results.append(result)
+
+                    if isinstance(result, dict) and (
+                        result.get("completeness") == "full"
+                        or (isinstance(result.get("data"), dict) and result["data"].get("completeness") in (100, "100", "full"))
+                    ):
+                        print(f"Video activity {activity_id} is fully read ('completeness': 'full'). Skipping remaining segments.")
+                        break
                 else:
                     try:
                         details = response.json()

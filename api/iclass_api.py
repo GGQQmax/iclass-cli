@@ -67,9 +67,9 @@ class TronClassAPI:
         self.files_api = TronClassFilesAPI(self.session)
         return await self.files_api.deleteUpload(upload_ids)
 
-    async def read_activity(self, activity_id: int, course_id: int = None):
+    async def read_activity(self, activity_id: int, course_id: int = None, upload_id: int = None):
         self.activity_api = TronClassActivityAPI(self.session)
-        return await self.activity_api.read_activity(activity_id, course_id)
+        return await self.activity_api.read_activity(activity_id, course_id, upload_id=upload_id)
     
     async def get_topic_categories(self, course_id: int):
         self.topic_api = TronClassTopicAPI(self.session)
