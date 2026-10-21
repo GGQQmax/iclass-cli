@@ -57,3 +57,5 @@ Or you are doing wth your are
 ls | grep HWK10 | iclassCLI -u --raw | iclassCLI -s -i "$(iclassCLI --todo | awk '/HWK10/{print $NF}')" -ids -
 ```
 I think you got the idea
+
+The mcp part of the code have move to https://github.com/ggqqmax/iclass-mcp
