@@ -20,7 +20,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/GGQQmax/iclass-cli/main/Icla
 Git clone the project
 
 ```bash
-git clone https://github.com/GGQQmax/iclass-cli.git
+git clone --recurse-submodules https://github.com/GGQQmax/iclass-cli.git
+cd iclass-cli
 ```
 
 ### Environment variables set up

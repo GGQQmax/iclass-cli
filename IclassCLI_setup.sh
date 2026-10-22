@@ -3,9 +3,22 @@
 
 set -e  # stop on error
 
-echo "🚀 Cloning iClass CLI repository..."
-git clone https://github.com/GGQQmax/iclass-cli.git
-cd iclass-cli
+# Check if already inside the iclass-cli repository
+if [ -d ".git" ] && git remote get-url origin 2>/dev/null | grep -q "iclass-cli"; then
+    echo "📂 Already inside iclass-cli repository."
+else
+    if [ -d "iclass-cli" ]; then
+        echo "📂 Entering existing iclass-cli directory..."
+        cd iclass-cli
+    else
+        echo "🚀 Cloning iClass CLI repository..."
+        git clone --recurse-submodules https://github.com/GGQQmax/iclass-cli.git
+        cd iclass-cli
+    fi
+fi
+
+echo "🔄 Initializing and updating git submodules..."
+git submodule update --init --recursive
 
 echo "🐍 Checking if Python virtual environment module is available..."
 if ! python3 -m ensurepip --version &>/dev/null; then
@@ -34,6 +47,9 @@ source venv/bin/activate
 echo "📦 Installing dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
+if [ -f "api/requirements.txt" ]; then
+    pip install -r api/requirements.txt
+fi
 
 # Ask for credentials
 echo ""
